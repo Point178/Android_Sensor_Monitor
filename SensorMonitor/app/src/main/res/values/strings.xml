@@ -1,0 +1,34 @@
+<resources>
+    <string name="app_name">Sensor Monitor</string>
+    <string name="accelerometer">Accelerometer</string>
+    <string name="gyroscope">Gyroscope</string>
+    <string name="magnetometer">Magnetometer</string>
+    <string name="ambientlight">Light</string>
+    <string name="rotationvector">Rotation vector</string>
+    <string name="proximity">Proximity</string>
+    <string name="barometer">Pressure</string>
+
+    <string name="start">Start</string>
+    <string name="stop">Stop</string>
+    <string name="type_number">Type number:</string>
+
+    <string name="record_time">Record time information :</string>
+    <string name="press_number_record">Press number record :</string>
+    <string name="sensor_value">Sensor value :</string>
+
+    <string name="uuid">uuid</string>
+    <string name="start_time">start time</string>
+    <string name="stop_time">stop time</string>
+
+    <string name="order">order</string>
+    <string name="number">num.</string>
+    <string name="down_time">down</string>
+    <string name="up_time">up</string>
+    <string name="duration">duration</string>
+
+    <string name="time">time</string>
+    <string name="x">x</string>
+    <string name="y">y</string>
+    <string name="z">z</string>
+    <string name="buttongroup">buttongroup</string>
+</resources>

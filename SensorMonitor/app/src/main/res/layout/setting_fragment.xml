@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <Switch
+        android:id="@+id/accelerometer"
+        style="@style/switch_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/accelerometer" />
+
+    <Switch
+        android:id="@+id/gyroscope"
+        style="@style/switch_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/gyroscope" />
+
+    <Switch
+        android:id="@+id/magnetometer"
+        style="@style/switch_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/magnetometer" />
+
+    <Switch
+        android:id="@+id/ambientlight"
+        style="@style/switch_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/ambientlight" />
+
+    <Switch
+        android:id="@+id/rotationvector"
+        style="@style/switch_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/rotationvector" />
+
+    <Switch
+        android:id="@+id/proximity"
+        style="@style/switch_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/proximity" />
+
+    <Switch
+        android:id="@+id/barometer"
+        style="@style/switch_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/barometer" />
+</LinearLayout>

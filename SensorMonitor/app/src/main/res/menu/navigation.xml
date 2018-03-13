@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/setting"
+        android:icon="@drawable/ic_setting_48"
+        android:title="setting" />
+    <item
+        android:id="@+id/recording"
+        android:icon="@drawable/ic_record_48"
+        android:title="record" />
+    <item
+        android:id="@+id/result"
+        android:icon="@drawable/ic_result_48"
+        android:title="result"/>
+</menu>
