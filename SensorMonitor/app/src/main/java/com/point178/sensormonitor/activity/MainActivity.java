@@ -12,16 +12,20 @@ import android.widget.Toast;
 
 import com.point178.sensormonitor.R;
 import com.point178.sensormonitor.attribute.SensorAttr;
+import com.point178.sensormonitor.connection.SocketConnection;
 import com.point178.sensormonitor.database.SensorBaseHelper;
 import com.point178.sensormonitor.fragment.RecordFragment;
 import com.point178.sensormonitor.fragment.ResultFragment;
 import com.point178.sensormonitor.fragment.SettingFragment;
+
+import java.net.Socket;
 
 public class MainActivity extends FragmentActivity {
     private BottomNavigationView mNavigationView;
     private SensorAttr sensor;
     private SQLiteDatabase mDatabase;
     private boolean isStart;
+    private SocketConnection socketConnection;
 
     /**
      * @Description: set sensor attribute(open or close)
@@ -50,8 +54,9 @@ public class MainActivity extends FragmentActivity {
     }
 
     public MainActivity() {
-        sensor = new SensorAttr();
-        isStart = false;
+            sensor = new SensorAttr();
+            isStart = false;
+            socketConnection = new SocketConnection();
     }
 
     @Override
@@ -88,11 +93,11 @@ public class MainActivity extends FragmentActivity {
                                 fm.beginTransaction().replace(R.id.fragment_container, settingFragment1).commit();
                                 break;
                             case "record":
-                                RecordFragment recordFragment = RecordFragment.newInstance(sensor);
+                                RecordFragment recordFragment = RecordFragment.newInstance(sensor, socketConnection);
                                 fm.beginTransaction().replace(R.id.fragment_container, recordFragment).commit();
                                 break;
                             case "result":
-                                ResultFragment resultFragment = ResultFragment.newInstance();
+                                ResultFragment resultFragment = ResultFragment.newInstance(socketConnection);
                                 fm.beginTransaction().replace(R.id.fragment_container, resultFragment).commit();
                                 break;
                         }

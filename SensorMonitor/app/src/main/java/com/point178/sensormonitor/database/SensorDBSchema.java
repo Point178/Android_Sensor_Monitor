@@ -11,6 +11,7 @@ public class SensorDBSchema {
             public static final String UUID = "uuid";
             public static final String START = "start";
             public static final String STOP = "stop";
+            public static final String pin = "pin";
         }
     }
 

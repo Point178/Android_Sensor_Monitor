@@ -14,6 +14,8 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 
 import com.point178.sensormonitor.R;
+import com.point178.sensormonitor.attribute.SensorAttr;
+import com.point178.sensormonitor.connection.SocketConnection;
 import com.point178.sensormonitor.database.SensorBaseHelper;
 import com.point178.sensormonitor.database.SensorDBSchema;
 
@@ -25,6 +27,7 @@ import java.util.List;
  */
 public class ResultFragment extends Fragment {
     private SQLiteDatabase mDatabase;
+    private SocketConnection socketConnection;
     private RecyclerView mRecordTimeRecyclerView;
     private RecordTimeAdapter mRecordTimeAdapter;
     private RecyclerView mNumberPressRecyclerView;
@@ -43,6 +46,9 @@ public class ResultFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, final Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.result_fragment, container, false);
+        if (getArguments() != null) {
+            socketConnection = (SocketConnection)getArguments().getSerializable("socket");
+        }
         mDatabase = new SensorBaseHelper((getContext().getApplicationContext())).getWritableDatabase();
 
         mAccelerometerButton = (RadioButton) v.findViewById(R.id.accelerometerButton);
@@ -263,8 +269,11 @@ public class ResultFragment extends Fragment {
         super.onCreate(savedInstanceState);
     }
 
-    public static ResultFragment newInstance() {
+    public static ResultFragment newInstance(SocketConnection socketConnection) {
         ResultFragment fragment = new ResultFragment();
+        Bundle args = new Bundle();
+        args.putSerializable("socket", socketConnection);
+        fragment.setArguments(args);
         return fragment;
     }
 

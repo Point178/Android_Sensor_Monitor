@@ -65,7 +65,8 @@ public class SensorBaseHelper extends SQLiteOpenHelper {
         db.execSQL("create table " + RecordTimeTable.NAME + "(" +
                 RecordTimeTable.Cols.UUID + " integer primary key autoincrement, " +
                 RecordTimeTable.Cols.START + ", " +
-                RecordTimeTable.Cols.STOP + ")");
+                RecordTimeTable.Cols.STOP + ", " +
+                RecordTimeTable.Cols.pin + ")");
     }
 
     @Override
