@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+         version="3.1">
+    <servlet>
+         <servlet-name>SensorValueServlet</servlet-name>
+         <servlet-class>com.point178.SensorValueServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SensorValueServlet</servlet-name>
+        <url-pattern>/AndroidServlet/SensorValue</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>NumberPressServlet</servlet-name>
+        <servlet-class>com.point178.NumberPressServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>NumberPressServlet</servlet-name>
+        <url-pattern>/AndroidServlet/NumberPress</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>RecordTimeServlet</servlet-name>
+        <servlet-class>com.point178.RecordTimeServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>RecordTimeServlet</servlet-name>
+        <url-pattern>/AndroidServlet/RecordTime</url-pattern>
+    </servlet-mapping>
+</web-app>

@@ -16,7 +16,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.point178.sensormonitor.connection.SocketConnection;
+import com.point178.sensormonitor.connection.HTTPConnection;
 import com.point178.sensormonitor.view.KeyboardView;
 import com.point178.sensormonitor.activity.MainActivity;
 import com.point178.sensormonitor.R;
@@ -24,7 +24,6 @@ import com.point178.sensormonitor.attribute.SensorAttr;
 import com.point178.sensormonitor.database.SensorBaseHelper;
 import com.point178.sensormonitor.database.SensorDBSchema;
 
-import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -39,8 +38,7 @@ public class RecordFragment extends Fragment implements KeyboardView.OnNumberCli
     private boolean isStart;
     private SensorAttr sensor;
     private SQLiteDatabase mDatabase;
-    private SocketConnection socketConnection;
-    private ExecutorService mThreadPool;
+    private ExecutorService mThread;
     private String uuidString;
     private long startTime;
     private long stopTime;
@@ -67,21 +65,26 @@ public class RecordFragment extends Fragment implements KeyboardView.OnNumberCli
      * @Author: 昕点陈
      * @Date: 2018/2/11
      */
-    public static RecordFragment newInstance(SensorAttr sensor, SocketConnection socketConnection) {
+    public static RecordFragment newInstance(SensorAttr sensor) {
         RecordFragment fragment = new RecordFragment();
         Bundle args = new Bundle();
         args.putSerializable("sensor", sensor);
-        args.putSerializable("socket", socketConnection);
         fragment.setArguments(args);
         return fragment;
     }
+
+    Runnable runnable = new Runnable() {
+        @Override
+        public void run() {//run()在新的线程中运行
+            HTTPConnection httpConnection = new HTTPConnection();
+        }
+    };
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, final Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.record_fragment, container, false);
         if (getArguments() != null) {
             this.sensor = (SensorAttr) getArguments().getSerializable("sensor");
-            socketConnection = (SocketConnection) getArguments().getSerializable("socket");
         }
 
         mDatabase = new SensorBaseHelper((getContext().getApplicationContext())).getWritableDatabase();
@@ -101,55 +104,53 @@ public class RecordFragment extends Fragment implements KeyboardView.OnNumberCli
         listener = new SensorEventListener() {
             @Override
             public void onSensorChanged(SensorEvent event) {
-                        long time = System.currentTimeMillis();
-                        ContentValues values = new ContentValues();
-                        values.put("time", time);
-                        int number = 0;
-                        String tableName = "";
+                long time = System.currentTimeMillis();
+                ContentValues values = new ContentValues();
+                values.put("time", time);
+                int number = 0;
+                String tableName = "";
 
-                        //check sensor type
-                        switch (event.sensor.getType()) {
-                            case Sensor.TYPE_ACCELEROMETER:
-                                number = SensorDBSchema.AccelerometerValueTable.NUMBER;
-                                tableName = SensorDBSchema.AccelerometerValueTable.NAME;
-                                break;
-                            case Sensor.TYPE_GYROSCOPE:
-                                number = SensorDBSchema.GyroscopeValueTable.NUMBER;
-                                tableName = SensorDBSchema.GyroscopeValueTable.NAME;
-                                break;
-                            case Sensor.TYPE_MAGNETIC_FIELD:
-                                number = SensorDBSchema.MagnetometerValueTable.NUMBER;
-                                tableName = SensorDBSchema.MagnetometerValueTable.NAME;
-                                break;
-                            case Sensor.TYPE_LIGHT:
-                                number = SensorDBSchema.AmbientLightValueTable.NUMBER;
-                                tableName = SensorDBSchema.AmbientLightValueTable.NAME;
-                                break;
-                            case Sensor.TYPE_ROTATION_VECTOR:
-                                number = SensorDBSchema.RotationVectorValueTable.NUMBER;
-                                tableName = SensorDBSchema.RotationVectorValueTable.NAME;
-                                break;
-                            case Sensor.TYPE_PROXIMITY:
-                                number = SensorDBSchema.ProximityValueTable.NUMBER;
-                                tableName = SensorDBSchema.ProximityValueTable.NAME;
-                                break;
-                            case Sensor.TYPE_PRESSURE:
-                                number = SensorDBSchema.PressureValueTable.NUMBER;
-                                tableName = SensorDBSchema.PressureValueTable.NAME;
-                                break;
-                        }
+                //check sensor type
+                switch (event.sensor.getType()) {
+                    case Sensor.TYPE_ACCELEROMETER:
+                        number = SensorDBSchema.AccelerometerValueTable.NUMBER;
+                        tableName = SensorDBSchema.AccelerometerValueTable.NAME;
+                        break;
+                    case Sensor.TYPE_GYROSCOPE:
+                        number = SensorDBSchema.GyroscopeValueTable.NUMBER;
+                        tableName = SensorDBSchema.GyroscopeValueTable.NAME;
+                        break;
+                    case Sensor.TYPE_MAGNETIC_FIELD:
+                        number = SensorDBSchema.MagnetometerValueTable.NUMBER;
+                        tableName = SensorDBSchema.MagnetometerValueTable.NAME;
+                        break;
+                    case Sensor.TYPE_LIGHT:
+                        number = SensorDBSchema.AmbientLightValueTable.NUMBER;
+                        tableName = SensorDBSchema.AmbientLightValueTable.NAME;
+                        break;
+                    case Sensor.TYPE_ROTATION_VECTOR:
+                        number = SensorDBSchema.RotationVectorValueTable.NUMBER;
+                        tableName = SensorDBSchema.RotationVectorValueTable.NAME;
+                        break;
+                    case Sensor.TYPE_PROXIMITY:
+                        number = SensorDBSchema.ProximityValueTable.NUMBER;
+                        tableName = SensorDBSchema.ProximityValueTable.NAME;
+                        break;
+                    case Sensor.TYPE_PRESSURE:
+                        number = SensorDBSchema.PressureValueTable.NUMBER;
+                        tableName = SensorDBSchema.PressureValueTable.NAME;
+                        break;
+                }
 
-                        //write in database
-                        if (number == 1) {
-                            values.put("x", event.values[0]);
-                        } else if (number == 3) {
-                            values.put("x", event.values[0]);
-                            values.put("y", event.values[1]);
-                            values.put("z", event.values[2]);
-                        }
-                        mDatabase.insert(tableName, null, values);
-
-                        socketConnection.sendSensorValue(time, tableName, number, event.values);
+                //write in database
+                if (number == 1) {
+                    values.put("x", event.values[0]);
+                } else if (number == 3) {
+                    values.put("x", event.values[0]);
+                    values.put("y", event.values[1]);
+                    values.put("z", event.values[2]);
+                }
+                mDatabase.insert(tableName, null, values);
             }
 
             @Override
