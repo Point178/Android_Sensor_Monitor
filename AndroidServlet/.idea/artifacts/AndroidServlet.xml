@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="war" build-on-make="true" name="AndroidServlet">
+    <output-path>$PROJECT_DIR$/out/artifacts/AndroidServlet</output-path>
+    <root id="archive" name="AndroidServlet.war">
+      <element id="dir-copy" path="$PROJECT_DIR$/web" />
+    </root>
+  </artifact>
+</component>

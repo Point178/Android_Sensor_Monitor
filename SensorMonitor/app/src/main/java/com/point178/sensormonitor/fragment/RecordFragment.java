@@ -9,14 +9,17 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.point178.sensormonitor.connection.HTTPConnection;
 import com.point178.sensormonitor.view.KeyboardView;
 import com.point178.sensormonitor.activity.MainActivity;
 import com.point178.sensormonitor.R;
@@ -24,7 +27,16 @@ import com.point178.sensormonitor.attribute.SensorAttr;
 import com.point178.sensormonitor.database.SensorBaseHelper;
 import com.point178.sensormonitor.database.SensorDBSchema;
 
-import java.util.concurrent.ExecutorService;
+import org.json.JSONObject;
+
+import java.io.BufferedWriter;
+import java.io.DataOutputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by 昕点陈 on 2018/2/6.
@@ -38,7 +50,7 @@ public class RecordFragment extends Fragment implements KeyboardView.OnNumberCli
     private boolean isStart;
     private SensorAttr sensor;
     private SQLiteDatabase mDatabase;
-    private ExecutorService mThread;
+    private Handler mHandler;
     private String uuidString;
     private long startTime;
     private long stopTime;
@@ -46,11 +58,7 @@ public class RecordFragment extends Fragment implements KeyboardView.OnNumberCli
     private SensorEventListener listener;
 
     public RecordFragment() {
-        try {
-            isStart = false;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        isStart = false;
     }
 
     @Override
@@ -73,13 +81,6 @@ public class RecordFragment extends Fragment implements KeyboardView.OnNumberCli
         return fragment;
     }
 
-    Runnable runnable = new Runnable() {
-        @Override
-        public void run() {//run()在新的线程中运行
-            HTTPConnection httpConnection = new HTTPConnection();
-        }
-    };
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, final Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.record_fragment, container, false);
@@ -98,6 +99,7 @@ public class RecordFragment extends Fragment implements KeyboardView.OnNumberCli
         mStop.setClickable(false);
         mTextView.setText("");
         mKeyboardView.setOnNumberClickListener(this);
+        new SubThread().start();
 
         //监听传感器的值
         mSensorManager = (SensorManager) getContext().getSystemService(Context.SENSOR_SERVICE);
@@ -143,14 +145,35 @@ public class RecordFragment extends Fragment implements KeyboardView.OnNumberCli
                 }
 
                 //write in database
-                if (number == 1) {
+                /*if (number == 1) {
                     values.put("x", event.values[0]);
                 } else if (number == 3) {
                     values.put("x", event.values[0]);
                     values.put("y", event.values[1]);
                     values.put("z", event.values[2]);
                 }
-                mDatabase.insert(tableName, null, values);
+                mDatabase.insert(tableName, null, values);*/
+                //write to server
+                Message sensorMsg = new Message();
+                sensorMsg.what = 0;
+                try {
+                    JSONObject sensorvalue = new JSONObject();
+                    sensorvalue.put("information", "sensorvalue");
+                    sensorvalue.put("type", tableName);
+                    sensorvalue.put("x", event.values[0]);
+                    if (event.values.length == 3) {
+                        sensorvalue.put("y", event.values[1]);
+                        sensorvalue.put("z", event.values[2]);
+                    } else {
+                        sensorvalue.put("y", null);
+                        sensorvalue.put("z", null);
+                    }
+                    sensorvalue.put("time", time);
+                    sensorMsg.obj = sensorvalue.toString();
+                    mHandler.sendMessage(sensorMsg);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
 
             @Override
@@ -169,9 +192,21 @@ public class RecordFragment extends Fragment implements KeyboardView.OnNumberCli
 
                 //record startTime
                 startTime = System.currentTimeMillis();
-                insertRecordTime();
-                getUUIDstring();
+                //insertRecordTime();
+                //getUUIDstring();
 
+                //write to server
+                try {
+                    JSONObject startRecord = new JSONObject();
+                    startRecord.put("information", "startRecord");
+                    startRecord.put("startTime", startTime);
+                    Message startRecordMsg = new Message();
+                    startRecordMsg.what = 2;
+                    startRecordMsg.obj = startRecord.toString();
+                    mHandler.sendMessage(startRecordMsg);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 //start listen sensor
                 sensorListen();
             }
@@ -184,10 +219,22 @@ public class RecordFragment extends Fragment implements KeyboardView.OnNumberCli
 
                 //record stoptime
                 stopTime = System.currentTimeMillis();
-                updateRecordTime();
+                //updateRecordTime();
 
-                //send to server
-
+                //write to server
+                try {
+                    JSONObject stopRecord = new JSONObject();
+                    stopRecord.put("information", "stopRecord");
+                    stopRecord.put("startTime", startTime);
+                    stopRecord.put("stopTime", stopTime);
+                    stopRecord.put("content", mTextView.getText());
+                    Message stopRecordMsg = new Message();
+                    stopRecordMsg.what = 3;
+                    stopRecordMsg.obj = stopRecord.toString();
+                    mHandler.sendMessage(stopRecordMsg);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
                 //set default
                 isStart = false;
@@ -307,7 +354,24 @@ public class RecordFragment extends Fragment implements KeyboardView.OnNumberCli
     public void onNumberReturn(String number, long downTime, long upTime) {
         if (isStart) {
             mTextView.setText(mTextView.getText() + number);
-            addNumberPress(number, downTime, upTime);
+            //addNumberPress(number, downTime, upTime);
+
+            //write to server
+            try {
+                JSONObject numberpress = new JSONObject();
+                numberpress.put("information", "numberPress");
+                numberpress.put("number", number);
+                numberpress.put("startTime", startTime);
+                numberpress.put("downTime", downTime);
+                numberpress.put("upTime", upTime);
+                numberpress.put("duration", upTime - downTime);
+                Message numberPressMsg = new Message();
+                numberPressMsg.what = 1;
+                numberPressMsg.obj = numberpress.toString();
+                mHandler.sendMessage(numberPressMsg);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -371,6 +435,44 @@ public class RecordFragment extends Fragment implements KeyboardView.OnNumberCli
             if (null != pressureSensor) {
                 mSensorManager.registerListener(listener, pressureSensor, SensorManager.SENSOR_DELAY_NORMAL);
             }
+        }
+    }
+
+    class SubThread extends Thread {
+        public void run() {
+            Looper.prepare();
+            try {
+                String BASEURL = "http://198.181.43.116:8080/AndroidServlet/PostData";
+                final URL url = new URL(BASEURL);
+                mHandler = new Handler(){
+                    public void handleMessage(Message msg){
+                        try {
+                            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                            connection.setRequestMethod("POST");
+                            connection.setDoInput(true);
+                            connection.setDoOutput(true);
+
+                            connection.setRequestProperty("Content-Type", "application/json");
+                            connection.setRequestProperty("Charset", "UTF-8");
+                            connection.connect();
+
+                            DataOutputStream outputStream =new DataOutputStream(connection.getOutputStream());
+                            outputStream.writeBytes(URLEncoder.encode(msg.obj.toString(), "utf-8"));
+                            outputStream.flush();
+                            outputStream.close();
+
+                            if(connection.getResponseCode() == 200){
+                                connection.disconnect();
+                            }
+                        }catch(Exception e){
+                            e.printStackTrace();
+                        }
+                    }
+                };
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            Looper.loop();
         }
     }
 }

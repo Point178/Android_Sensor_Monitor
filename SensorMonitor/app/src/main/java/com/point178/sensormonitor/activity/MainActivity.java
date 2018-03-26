@@ -50,8 +50,8 @@ public class MainActivity extends FragmentActivity {
     }
 
     public MainActivity() {
-            sensor = new SensorAttr();
-            isStart = false;
+        sensor = new SensorAttr();
+        isStart = false;
     }
 
     @Override
