@@ -34,23 +34,23 @@ It contains only one [servlet](https://github.com/Point178/Android_Sensor_Monito
 - - -  
 ## Database
  * record_times  
- uuid int<11> PRI NULL auto_increment  
- startTime mediumText NULL  
- stopTime mediumText NULL  
- content varchar<100> NULL  
-  
+ uuid - int<11> - PRI - auto_increment  
+ startTime - mediumText  
+ stopTime - mediumText  
+ content - varchar<100>  
+ 
  * number_press  
- uuid          int<11>                NULL  
- number        int<11>                    NULL  
- downTime    mediumText                   NULL  
- upTime      mediumText                   NULL  
- duration    mediumText                   NULL  
+ uuid - int<11>  
+ number - int<11>  
+ downTime - mediumText  
+ upTime - mediumText  
+ duration - mediumText  
    
  * [sensor_name]_value  
- time        mediumText                   NULL  
- x             double                     NULL  
- y             double                     NULL                (optional according to sensor attributes)  
- z             double                     NULL            (optional according to sensor attributes)  
+ time - mediumText  
+ x - double  
+ y - double (optional according to sensor attributes)  
+ z - double (optional according to sensor attributes)  
   
 - - -  
 ## Classifier (Tensorflow - CNN)  
